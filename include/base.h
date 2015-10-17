@@ -26,4 +26,10 @@
 #include <errno.h>
 #include <stdlib.h>
 
+/* 功能性宏 */
+#define SAFE_DELETE(ptr) do{ \
+if(ptr != NULL){ \
+	free(ptr); ptr = NULL; \
+}}while(0)
+
 #endif
