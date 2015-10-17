@@ -1,5 +1,7 @@
+#include <assert.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 
 // 解析命令行参数
@@ -10,10 +12,33 @@ extern int opterr;
 // 守护程序
 void daemonize(void)
 {
+	char *cwd = getcwd(NULL, 0);
+	pid_t pid;
+	if((pid = fork()) != -1)
+	{
+		if(pid > 0)
+		{	
+			// 父进程退出
+			_exit(0);
+		}
+		
+		setsid();
+		umask(0);
+		chdir(cwd);
+		free(cwd);
+		
+		/* 关闭所有的文件描述符 */
+		int fd;
+		for(fd=0; fd<getdtablesize(); fd++)
+		{
+			close(fd);
+		}
+	}
+	assert(pid != -1);
 	return ;
 }
 
-// 显示程序用法
+// 显示程序帮助信息
 void usage(void)
 {	
 	fprintf(stdout, "\n" \
@@ -39,11 +64,15 @@ int main(int argc, char **argv)
 	{
 		switch(c)
 		{
-			case 'd': break;
+			case 'd': daemonize(); break;
 			case 'c': break;
 			case 'h': usage(); break;
 			case '?': usage(); break;
 		}
+	}
+	for(;;)
+	{	
+		sleep(2);
 	}
 	return 0;
 }
