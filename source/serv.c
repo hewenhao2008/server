@@ -70,9 +70,11 @@ int main(int argc, char **argv)
 			case '?': usage(); break;
 		}
 	}
+	#ifdef DEBUG
 	for(;;)
-	{	
+	{
 		sleep(2);
 	}
+	#endif
 	return 0;
 }
