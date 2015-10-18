@@ -88,7 +88,7 @@ int ioloop(int sock)
 						if((list+i)->data.fd == sock)
 						{
 							int peer; // 对端FD
-							int size;
+							socklen_t size;
 							struct sockaddr_in host;
 							ZEROMEMORY(host);
 							

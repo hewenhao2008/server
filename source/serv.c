@@ -1,10 +1,6 @@
-#include <assert.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include "util.h"
+#include <base.h>
+#include <util.h>
+#include <sys/stat.h>
 
 // 解析命令行参数
 extern char *optarg;
@@ -36,6 +32,7 @@ void daemonize(void)
 			close(fd);
 		}
 		
+		// 屏蔽一些信号
 		#ifdef DEBUG
 		#endif
 	}

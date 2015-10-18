@@ -12,6 +12,19 @@
 #define NDEBUG
 #endif
 
+/*
+#if defined(WIN32) || defined(_WIN32)
+#define LINUX
+#endif
+
+#ifdef LINUX
+#define STDCALL
+#else
+#define STDCALL __stdcall
+#endif */
+
+#define STDCALL
+
 /* 包含基本的头文件 */
 #include <assert.h>
 #include <sys/epoll.h>
@@ -27,9 +40,17 @@
 #include <stdlib.h>
 
 /* 功能性宏 */
+// 安全删除指针
 #define SAFE_DELETE(ptr) do{ \
 if(ptr != NULL){ \
 	free(ptr); ptr = NULL; \
 }}while(0)
+//　初始化结构体
+#define ZEROMEMORY(o) memset((void *)&o, sizeof(o), 0)
+
+/* 数据类型声明 */
+typedef void *HENV;
+typedef unsigned long ulong;
 
 #endif
+

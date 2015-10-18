@@ -1,18 +1,4 @@
-#define STDCALL
-#include <assert.h>
-#include <sys/epoll.h>
-#include <sys/epoll.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/types.h> 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <pthread.h>
-#include <stdlib.h>
+#include <base.h>
 
 typedef void * HCHAIN; // 调用链句柄
 typedef unsigned int (STDCALL *HANDLER)(const int data); // 回调函数类型
@@ -112,7 +98,7 @@ int join(HCHAIN hchain, void *so, HANDLER cb)
 int chain_call(const HCHAIN hchain, int data)
 {
 	assert(hchain != NULL);
-	char *buffer = (char *)data;
+	// char *buffer = (char *)data;
 	return -1;
 }
 
