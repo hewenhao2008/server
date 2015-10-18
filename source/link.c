@@ -1,7 +1,5 @@
 #include <base.h>
-
-typedef void * HCHAIN; // 调用链句柄
-typedef unsigned int (STDCALL *HANDLER)(const int data); // 回调函数类型
+#include <link.h>
 
 /* 函数对象hash */
 typedef struct __hash
@@ -32,7 +30,7 @@ typedef struct __cb_chain
 }cb_chain;
 
 /* 分配数据结构 */
-HCHAIN chain()
+HCHAIN chain(void)
 {
 	cb_chain *ptr = (cb_chain *)malloc(sizeof(cb_chain));
 	assert(ptr != NULL);
@@ -62,16 +60,21 @@ int join(HCHAIN hchain, void *so, HANDLER cb)
 	if(!chain->HEAD)
 	{
 		cb_node *node = (cb_node *)malloc(sizeof(cb_node));
+		#ifdef DEBUG
+		printf("[join node]:%p\n", node);
+		#endif
 		if(node)
 		{
 			/* new callback node.*/
 			node->prev = node;
 			node->next = node;
-			//node->__hash.h.so_addr = so;
-			//node->__hash.h.so_addr = cb;
+			node->entry = cb;
+			node->__hash.h.so_addr = (ulong)so;
+			node->__hash.h.so_addr = (ulong)cb;
 			/* join in the chain */
 			chain->HEAD = node;
 			chain->TAIL = node;
+			chain->count++;
 
 			return 0;
 		}
@@ -80,31 +83,47 @@ int join(HCHAIN hchain, void *so, HANDLER cb)
 	{
 		cb_node *tail = chain->TAIL;
 		cb_node *node = (cb_node *)malloc(sizeof(cb_node));
+		#ifdef DEBUG
+		printf("[join node]:%p\n", node);
+		#endif
 		if(node)
 		{
 			tail->next = node;
 			node->prev = tail;
 			node->next = chain->HEAD;
-			//node->hash = hash;
-
+			node->entry = cb;
+			node->__hash.h.so_addr = (ulong)so;
+			node->__hash.h.so_addr = (ulong)cb;
+			/* join in the chain */
+			chain->HEAD->prev = node;
+			chain->TAIL = node;
+			chain->count++;
+			
 			return 0;
 		}
 	}
 	return -1;
 }
-/* 指针与下标  - 指针的效率 */
 
 /* 调用回调函数 */
 int chain_call(const HCHAIN hchain, int data)
 {
 	assert(hchain != NULL);
-	// char *buffer = (char *)data;
-	return -1;
-}
-
-int dispatch()
-{
+	cb_chain *chain = (cb_chain *)hchain;
+	if(chain->HEAD)
+	{
+		// 遍历双向链表，执行回调函数
+		cb_node *cp = chain->HEAD;
+		cb_node *head = cp;
+		
+		while(cp->next != head)
+		{
+			if(cp->entry(data) <= 0)
+			{
+				return -1;
+			}
+			cp = cp->next;
+		}
+	}
 	return 0;
 }
-
-

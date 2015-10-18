@@ -39,6 +39,7 @@ HENV init_rte(void)
 			sysinfo(&_info);
 			rte->sys_alive = _info.uptime;
 			rte->alive = 0;
+			_h = rte;
 			
 			return (HENV)rte;
 		}
@@ -49,5 +50,6 @@ HENV init_rte(void)
 	return _h;
 }
 
+// 程序要使用的环境变量: SERVADDR=127.0.0.1:8000
 
 

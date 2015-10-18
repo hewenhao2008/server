@@ -1,5 +1,6 @@
 #include <base.h>
 #include <util.h>
+#include <link.h>
 #include <sys/stat.h>
 
 // 解析命令行参数
@@ -75,9 +76,10 @@ int main(int argc, char **argv)
 		}
 	}
 	#ifdef DEBUG
+	// 程序调试用
 	for(;;)
 	{
-		printf("console...\n");
+		printf("here is some text...\n");
 		sleep(2);
 	}
 	#endif
