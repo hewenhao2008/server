@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
+#include <fcntl.h>
+#include "util.h"
 
 // 解析命令行参数
 extern char *optarg;
@@ -12,27 +14,30 @@ extern int opterr;
 // 守护程序
 void daemonize(void)
 {
-	char *cwd = getcwd(NULL, 0);
 	pid_t pid;
 	if((pid = fork()) != -1)
 	{
+		umask(0);
 		if(pid > 0)
 		{	
 			// 父进程退出
 			_exit(0);
 		}
-		
+		//　新会话
 		setsid();
-		umask(0);
-		chdir(cwd);
-		free(cwd);
-		
-		/* 关闭所有的文件描述符 */
 		int fd;
-		for(fd=0; fd<getdtablesize(); fd++)
+		if((fd = open("/dev/null", O_RDWR)) != -1)
 		{
+			// 重定向标准句柄 stdin(0), stdout(1), stderr(2)
+			dup2(fd, 0);
+			dup2(fd, 1);
+			dup2(fd, 2);
+			
 			close(fd);
 		}
+		
+		#ifdef DEBUG
+		#endif
 	}
 	assert(pid != -1);
 	return ;
@@ -55,6 +60,8 @@ void usage(void)
 	return ;
 }
 
+extern char **environ;
+
 int main(int argc, char **argv)
 {
 	// 忽略错误参数
@@ -73,6 +80,7 @@ int main(int argc, char **argv)
 	#ifdef DEBUG
 	for(;;)
 	{
+		printf("console...\n");
 		sleep(2);
 	}
 	#endif
