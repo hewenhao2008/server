@@ -50,7 +50,7 @@ static inline void io_set(int index)
 /*
 	@brief: 等待所有的线程就绪。
 	@pram: ready - 要等待的fd数量。
-	@pram: timeout - 超时时间（单位：毫秒）
+	@pram: timeout - 超时时间（单位：毫秒），占位符，超时时间由epoll_wait函数指定。
 */
 static inline int io_wait(int ready, int timeout)
 {	
@@ -65,3 +65,4 @@ static inline void io_reset()
 {
 	_status = 0;
 }
+

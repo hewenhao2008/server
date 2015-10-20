@@ -40,6 +40,7 @@
 #include <stdlib.h>
 
 /* 功能性宏 */
+
 // 安全删除指针
 #define SAFE_DELETE(ptr) do{ \
 if(ptr != NULL){ \
@@ -47,6 +48,16 @@ if(ptr != NULL){ \
 }}while(0)
 //　初始化结构体
 #define ZEROMEMORY(o) memset((void *)&o, sizeof(o), 0)
+// 将文件描述符设置为异步模式
+#define ASYNCFD(fd) do{ \
+int _flags = fcntl(fd, F_GETFL, 0); \
+if(_flags != -1){ \
+	_flags = fcntl(fd, F_SETFL, _flags | O_NONBLOCK); \
+	assert(_flags != -1); \
+}}while(0)
+// 跳出错误处理结构
+#define JUMP(o) if(o == -1){break; perror("error:");}
+
 
 /* 数据类型声明 */
 typedef void *HENV;

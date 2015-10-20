@@ -1,30 +1,7 @@
-#include <assert.h>
-#include <sys/epoll.h>
-#include <sys/epoll.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/types.h> 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <pthread.h>
-#include <stdlib.h>
+#include <base.h>
+
 #define _SIZE 256
 #define WAIT 10
-/* 用零初始化数据结构 */
-#define ZEROMEMORY(o) memset((void *)&o, sizeof(o), 0)
-/* 跳出错误处理结构 */
-#define JUMP(o) if(o == -1){break; perror("error:");}
-/* 将文件描述符设置为异步模式 */
-#define ASYNCFD(fd) do{ \
-int _flags = fcntl(fd, F_GETFL, 0); \
-if(_flags != -1){ \
-	_flags = fcntl(fd, F_SETFL, _flags | O_NONBLOCK); \
-	assert(_flags != -1); \
-}}while(0)
 
 int ready_for_loop()
 {
@@ -55,7 +32,10 @@ int ready_for_loop()
 	return -1;
 }
 
-/* 事件循环 */
+/* 定时器回调函数 */
+typedef void (STDCALL *cb_timer)(int);
+
+/* 事件循环(只允许主线程调用该函数) */
 int ioloop(int sock)
 {	
 	int inst = -1;
@@ -77,6 +57,7 @@ int ioloop(int sock)
 			ZEROMEMORY(list);
 			
 			/* 事件循环 */
+			/* 用epoll的主循环做一个定时器(用最小堆实现) */
 			for(;;)
 			{
 				int cnt;
@@ -102,9 +83,12 @@ int ioloop(int sock)
 									_e.data.fd = peer;
 									epoll_ctl(inst, EPOLL_CTL_ADD, peer, &_e);
 									
+									/* 运行时环境连接计数器加1 */
+									// rtenv->peer_cnt++;
+									
 									/* 调试信息：打印远程主机信息 */
 									#ifndef NDEBUG
-									printf("\e[32m[accept new connection]: \"pda://%s:%d\"\e[0m\n", \
+									printf("\e[32m[accept new connection]: \"peer://%s:%d\"\e[0m\n", \
 										inet_ntoa(host.sin_addr), ntohs(host.sin_port));
 									#endif
 								}
@@ -121,19 +105,15 @@ int ioloop(int sock)
 						else if((list+i)->events & EPOLLRDHUP)
 						{
 							/* 关闭连接 */
-							#ifndef NDEBUG
-							printf("remote host disconnected...\n");
-							#endif
+							epoll_ctl(inst, EPOLL_CTL_DEL, (list+i)->data.fd, NULL);
+							continue;
+							
 						}
 						else if((list+i)->events & EPOLLIN)
 						{
-							#ifndef NDEBUG
-							//printf("cnt:%d\n", cnt);
-							char data[1024];
-							ZEROMEMORY(data);
-							recv((list+i)->data.fd, data, 1024, 0);
-							printf("数据:%s\n", data);
-							#endif
+							/* 分发至各个CPU核上处理数据 */
+							//int fd = (list+i)->data.fd;
+							//int _index = i;
 						}
 						else
 						{	
