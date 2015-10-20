@@ -80,6 +80,7 @@ int main(int argc, char **argv)
 	for(;;)
 	{
 		printf("here is some text...\n");
+		printf("uint64_t:%d\n", sizeof(uint64_t));
 		sleep(2);
 	}
 	#endif

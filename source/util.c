@@ -5,14 +5,16 @@
 */
 
 #include <base.h>
+#include <util.h>
 #include <sys/sysinfo.h>
 
 static HENV _h = NULL;
 
 typedef struct __RTENV
 {
-	ulong sys_alive;
-	ulong alive;
+	ulong sys_alive;	// OS运行时间
+	ulong alive;		// 系统持续运行时间
+	ulong peercnts;		// 当前连接的客户端数
 }RTENV;
 
 
@@ -51,5 +53,10 @@ HENV init_rte(void)
 }
 
 // 程序要使用的环境变量: SERVADDR=127.0.0.1:8000
+void parse_env_vars()
+{
+	// 在栈区分配解析缓冲区，必须检查目标字符串长度
+	return ;
+}
 
 

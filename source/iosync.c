@@ -3,18 +3,19 @@
 	@Mail: i-careforu@foxmail.com
 	@Comment:　本程序采用自行设计的线程同步方法，避免程序频繁陷入内核态，提高系统吞吐量。
 	@Detail: 高效模型中系统锁不适用与线程同步，本系统采用hamming code实现了高性能的用
-	户态多并发同步工具。hamming code请参考维基百科(https://en.wikipedia.org/wiki/Hamming_weight)
+	户态多并发同步工具。hamming code请参考维基百科
+	(https://en.wikipedia.org/wiki/Hamming_weight)
 */
+
+#include <base.h>
 
 /*	
-	＠Explanation: 32位CPU采用的32位全加器，无法计算64位整形(int64)或者更高位数的数据。
-	本程序采用数组表示32位以上的数据。	
+	＠Explanation: 32位CPU采用的32位全加器，无法直接计算64位整形(int64)或者更高位
+	数的数据(可采用x86的状态寄存器的AF与CF位实现)。本程序采用数组表示64位以上的数据。	
 */
 
-typedef long long uint64_t;
-
-//types and constants used in the functions below
-
+static uint64_t _status;
+// 常量表（用于计算汉明权）
 const uint64_t m1  = 0x5555555555555555; //binary: 0101...
 const uint64_t m2  = 0x3333333333333333; //binary: 00110011..
 const uint64_t m4  = 0x0f0f0f0f0f0f0f0f; //binary:  4 zeros,  4 ones ...
@@ -24,39 +25,43 @@ const uint64_t m32 = 0x00000000ffffffff; //binary: 32 zeros, 32 ones
 const uint64_t hff = 0xffffffffffffffff; //binary: all ones
 const uint64_t h01 = 0x0101010101010101; //the sum of 256 to the power of 0,1,2,3...
 
-//This is a naive implementation, shown for comparison,
-//and to help in understanding the better functions.
-//It uses 24 arithmetic operations (shift, add, and).
-int popcount_1(uint64_t x) {
-    x = (x & m1 ) + ((x >>  1) & m1 ); //put count of each  2 bits into those  2 bits 
-    x = (x & m2 ) + ((x >>  2) & m2 ); //put count of each  4 bits into those  4 bits 
-    x = (x & m4 ) + ((x >>  4) & m4 ); //put count of each  8 bits into those  8 bits 
-    x = (x & m8 ) + ((x >>  8) & m8 ); //put count of each 16 bits into those 16 bits 
-    x = (x & m16) + ((x >> 16) & m16); //put count of each 32 bits into those 32 bits 
-    x = (x & m32) + ((x >> 32) & m32); //put count of each 64 bits into those 64 bits 
-    return x;
+/*
+	@brief: 计算整形的汉明权(在具有快速乘法器上效率最高的实现方式，算法复杂度仅为常量级12)。
+	@param: x - 整数。
+*/
+static int popcount(uint64_t x)
+{
+    x -= (x >> 1) & m1;
+    x = (x & m2) + ((x >> 2) & m2);
+    x = (x + (x >> 4)) & m4;
+    
+    return (x * h01)>>56;
 }
 
-//This uses fewer arithmetic operations than any other known  
-//implementation on machines with slow multiplication.
-//It uses 17 arithmetic operations.
-int popcount_2(uint64_t x) {
-    x -= (x >> 1) & m1;             //put count of each 2 bits into those 2 bits
-    x = (x & m2) + ((x >> 2) & m2); //put count of each 4 bits into those 4 bits 
-    x = (x + (x >> 4)) & m4;        //put count of each 8 bits into those 8 bits 
-    x += x >>  8;  //put count of each 16 bits into their lowest 8 bits
-    x += x >> 16;  //put count of each 32 bits into their lowest 8 bits
-    x += x >> 32;  //put count of each 64 bits into their lowest 8 bits
-    return x & 0x7f;
+/*
+	@brief: 内联函数置位。
+	@param: fd在epoll事件列表的索引。
+*/
+static inline void io_set(int index)
+{
+	_status = 1 >> index & _status;
 }
 
-//This uses fewer arithmetic operations than any other known  
-//implementation on machines with fast multiplication.
-//It uses 12 arithmetic operations, one of which is a multiply.
-int popcount_3(uint64_t x) {
-    x -= (x >> 1) & m1;             //put count of each 2 bits into those 2 bits
-    x = (x & m2) + ((x >> 2) & m2); //put count of each 4 bits into those 4 bits 
-    x = (x + (x >> 4)) & m4;        //put count of each 8 bits into those 8 bits 
-    return (x * h01)>>56;  //returns left 8 bits of x + (x<<8) + (x<<16) + (x<<24) + ... 
+/*
+	@brief: 等待所有的线程就绪。
+	@pram: ready - 要等待的fd数量。
+	@pram: timeout - 超时时间（单位：毫秒）
+*/
+static inline int io_wait(int ready, int timeout)
+{	
+	return (popcount(_status) == ready) ? 0 : -1;
 }
 
+/*
+	@brief: 内联函数复位。
+	@param: 复位标识位。
+*/
+static inline void io_reset()
+{
+	_status = 0;
+}
