@@ -1,6 +1,7 @@
 #include <base.h>
 #include <util.h>
 #include <link.h>
+#include <epoll.h>
 #include <sys/stat.h>
 
 // 解析命令行参数
@@ -77,12 +78,12 @@ int main(int argc, char **argv)
 	}
 	#ifdef DEBUG
 	// 程序调试用
-	for(;;)
-	{
-		printf("here is some text...\n");
-		printf("uint64_t:%d\n", sizeof(uint64_t));
-		sleep(2);
-	}
 	#endif
+	// 配置以环境变量优先，配置文件次之。
+	int fd;
+	if((fd = ready_for_loop(0, 9000)) != -1)
+	{
+		ioloop(fd);	
+	}
 	return 0;
 }

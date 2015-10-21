@@ -1,10 +1,24 @@
+/*
+	@Author: wanglw
+	@Mail: i-careforu@foxmail.com
+	@Comment: 记录epoll技术的高效IO模块，为非线程安全的，所由api均必须由主线程来调用。
+*/
+
 #include <base.h>
+#include <util.h>
+#include <sys/syscall.h>
 
 #define _SIZE 256
 #define WAIT 10
 
-int ready_for_loop()
+/* 保存指向系统运行环境数据结构的指针 */
+static RTENV *rte;
+
+int ready_for_loop(unsigned int ip, unsigned int port)
 {
+	rte = (RTENV *)get_rte();
+	assert(rte != NULL);
+	
 	int sock = -1;
 	if((sock = socket(AF_INET, SOCK_STREAM, 0)) != -1)
 	{	
@@ -16,14 +30,18 @@ int ready_for_loop()
 			
 			// 绑定本地地址
 			addr.sin_family 		= AF_INET;
-			addr.sin_port 			= htons(9000); // 监听端口9000
-			addr.sin_addr.s_addr 	= INADDR_ANY;  // 绑定所有网卡
+			addr.sin_port 			= htons(port); // 监听端口9000
+			addr.sin_addr.s_addr 	= (ip == 0) ? INADDR_ANY : ip;  // 绑定所有网卡
 			
-			if(!bind(sock, (struct sockaddr *)&addr, sizeof(struct sockaddr)))
-			{
-				listen(sock, WAIT);
+			int _r = bind(sock, (struct sockaddr *)&addr, \
+					sizeof(struct sockaddr));
+			
+			/* 绑定失败可能是由无权限或者端口已被绑定造成的 */
+			if(!_r && !listen(sock, WAIT))
+			{	
 				return sock;
 			}
+			
 		}while(0);
 		
 		perror("ready_for_loop:");
@@ -31,13 +49,17 @@ int ready_for_loop()
 	}
 	return -1;
 }
-
-/* 定时器回调函数 */
-typedef void (STDCALL *cb_timer)(int);
-
-/* 事件循环(只允许主线程调用该函数) */
+ 
+/* 事件循环 */
 int ioloop(int sock)
 {	
+	/* 事件循环仅在主线程中可调用 */
+	#ifdef DEBUG
+	pid_t pid, tid;
+	assert(((pid = getpid()) != -1) \
+		&& ((tid = syscall(SYS_gettid)) != -1) && (pid == tid));
+	#endif
+	
 	int inst = -1;
 	if((inst = epoll_create(_SIZE)) != -1)
 	{
@@ -84,7 +106,10 @@ int ioloop(int sock)
 									epoll_ctl(inst, EPOLL_CTL_ADD, peer, &_e);
 									
 									/* 运行时环境连接计数器加1 */
-									// rtenv->peer_cnt++;
+									rte->peercnts++;
+									#ifdef DEBUG
+									printf("\e[32m[peer-count]: %d\e[0m\n", rte->peercnts);
+									#endif
 									
 									/* 调试信息：打印远程主机信息 */
 									#ifndef NDEBUG
@@ -94,18 +119,26 @@ int ioloop(int sock)
 								}
 								else if((errno == EWOULDBLOCK) || (errno == EAGAIN))
 								{
+									#ifdef DEBUG
+									printf("[accept]: compelte.\n");
+									#endif
 									break;
 								}
 								else
 								{	
-									exit(-1);
+									/* 建立连接出错，记录日志 */
+									/* 一定时间内频繁出错，则生成core文件供调试 */
 								}
 							}
 						}
 						else if((list+i)->events & EPOLLRDHUP)
 						{
 							/* 关闭连接 */
+							rte->peercnts--;
 							epoll_ctl(inst, EPOLL_CTL_DEL, (list+i)->data.fd, NULL);
+							#ifdef DEBUG
+							printf("\e[32m[peer-count]: %d\e[0m\n", rte->peercnts);
+							#endif
 							continue;
 							
 						}

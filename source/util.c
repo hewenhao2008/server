@@ -10,19 +10,13 @@
 
 static HENV _h = NULL;
 
-typedef struct __RTENV
-{
-	ulong sys_alive;	// OS运行时间
-	ulong alive;		// 系统持续运行时间
-	ulong peercnts;		// 当前连接的客户端数
-	ulong tcnts;		// 线程数量（等于CPU核数）
-}RTENV;
-
-
 // 获取系统全局的RTE
 HENV get_rte(void)
 {
-	assert(_h != NULL);
+	if(!_h)
+	{
+		init_rte();
+	}
 	return _h;
 }
 
@@ -32,8 +26,8 @@ HENV init_rte(void)
 	if(!_h)
 	{
 		RTENV *rte = (RTENV *)malloc(sizeof(RTENV));
-		assert(rte != NULL); // 
-		if(!rte)
+		assert(rte != NULL); // 在内存中分配数据结构 
+		if(rte)
 		{	
 			memset((void *)rte, sizeof(RTENV), 0);
 			// 获取系统启动时间
