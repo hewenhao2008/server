@@ -71,9 +71,9 @@ int main(int argc, char **argv)
 		switch(c)
 		{
 			case 'd': daemonize(); break;
-			case 'c': break;
 			case 'h': usage(); break;
 			case '?': usage(); break;
+			case 'c': /* loadconf(optarg); */ break;
 		}
 	}
 	#ifdef DEBUG

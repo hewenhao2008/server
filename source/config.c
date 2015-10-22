@@ -16,7 +16,8 @@
 /* config句柄 */
 typedef struct __config
 {
-｝config;
+    void *ptr;
+}config;
 
 /* 加载配置文件 */
 HCONFIG STDCALL loadconf(const char *path)

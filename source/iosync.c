@@ -1,7 +1,8 @@
 /*
 	@Author: gatsby
+    @Data: 2015-10-22
 	@Mail: i-careforu@foxmail.com
-	@Comment:　本程序采用自行设计的线程同步方法，避免程序频繁陷入内核态，提高系统吞吐量。
+	@Comment: 本程序采用自行设计的线程同步方法，避免程序频繁陷入内核态，提高系统吞吐量。
 	@Detail: 高效模型中系统锁不适用与线程同步，本系统采用hamming code实现了高性能的用
 	户态多并发同步工具。hamming code请参考维基百科
 	(https://en.wikipedia.org/wiki/Hamming_weight)
