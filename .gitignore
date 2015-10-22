@@ -1,0 +1,9 @@
+.gitignore
+bin/
+bind/
+source/*.o
+source/*.c~
+source/*.h~
+source/serv
+source/makefile~
+include/base.h~
