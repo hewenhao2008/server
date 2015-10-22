@@ -9,7 +9,7 @@
 #include <sys/sysinfo.h>
 
 static HENV _h = NULL;
-
+// 性能统计 - 可用于权重计算
 // 获取系统全局的RTE
 HENV get_rte(void)
 {
