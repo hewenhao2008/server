@@ -23,7 +23,8 @@
 #define STDCALL __stdcall
 #endif */
 
-#define STDCALL
+#define STDCALL /* 标准调用约定 */
+#define CALLBACK
 
 /* 包含基本的头文件 */
 #include <assert.h>
@@ -38,6 +39,7 @@
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 /* 功能性宏 */
 

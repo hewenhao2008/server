@@ -1,33 +1,37 @@
-# 配置服务器的makefile
-
-# 编译工具链
-CC = gcc
-LD = ld
-AR = ar
-CC_OPTION = -DDEBUG -Wall
-LD_OPTION = -lc
+# @Author: gatbsy
+# @Date: 2015-10-8
+# @Mail: i-careforu@foxmail.com
+# @Brief: 配置服务器的makefile。
 
 # 工程相关属性
 PROJECT_NAME = serv
 PLATFORM = LINUX
 ARCH = _X86_
 
+# 编译工具链
+CC = gcc
+LD = ld
+AR = ar
+CC_OPTION = -DDEBUG -D$(ARCH) -D$(PLATFORM) -Wall
+LD_OPTION = -lc -pthread
+
 # SHELL命令
-EXECSH = /bin/sh -c
 RM = rm -rf
 CP = cp -r
 ECHO = echo
+BASH = bash 
 
 # 依赖的头文件与链接库
 INCLUDE := -I../include -I./
-LIBPATH := 
+LD_LIBRARY_PATH :=
+LD_LIBRARY :=
 
 # 目标文件列表
 OBJS = $(patsubst %.c, %.o, $(wildcard *.c, ./*.c))
 
 # 目标
 $(PROJECT_NAME): $(OBJS)
-	$(CC) $(LD_OPTION) -o $@ $(OBJS)
+	$(CC) $(LD_OPTION) $(LD_LIBRARY_PATH) $(LD_LIBRARY) -o $@ $(OBJS)
 
 # 隐含规则
 .c.o:
@@ -35,13 +39,12 @@ $(PROJECT_NAME): $(OBJS)
 
 # 清除编译过程中的中间文件
 clean:
-	-@$(ECHO) "[clean up workspace] ×××"
+	-@$(ECHO) "[clean up workspace]"
 	-@$(RM) $(PROJECT_NAME) makefile~ *.o *.h~ *.c~ 
 
 # 安装服务器
 install:
-	@$(ECHO) "[installing] ×××"
-	# @if [ $(id -u) -eq 1000 ]; then exit 1; fi
+	-@$(ECHO) "[installing]"
 
 # 伪目标
 .PHONY: all clean install
