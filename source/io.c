@@ -44,33 +44,20 @@ extern inline void *_memcpy(const void *src, void *dst, size_t size)
     /* AT&T汇编语言 */
    __asm__ __volatile__(
         ":::memory"
-       /* "cld\n\t"
-        "movl %0, %%ecx\n\t"
-        "movl %1, %%esi\n\t"
-        "repnz lodsd\n\t"
-        "movl %0, %%ecx\n\t"
-        "repnz stosd\n\t"
-        ::"=r"(size << ALIGN):memory */
-   );
+    );
 
    return dst;
 }
-/* @Note: __asm__ [__volatile__]("instruction list":Output:Input:Clobber/Modify) */
-/* @Note:  */
 
 extern inline void *_zero(void *src, size_t size)
 {
-    #ifdef _X86_
     /* AT&T汇编语言 */
     __asm__ __volatile(
         "cli;"
-        "mov %0, %%ecx;"
-        "xor %%eax, %%eax;"
         "rep stosd;"
-        ::"r"(size << ALIGN)
+        ::"s"(src), "c"(size << ALIGN)
+        :"%%ecx", "%%esi"
     );
-    #else
-    #endif
 
     return src;
 }
