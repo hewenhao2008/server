@@ -41,11 +41,38 @@ int setdef(size_t size)
 为内联函数减少函数调用的开销（参数、返回地址、寄存器入栈出栈，指令跳转降低CPU Cache命中率的问题）。 */
 extern inline void *_memcpy(const void *src, void *dst, size_t size)
 {
+    /* AT&T汇编语言 */
    __asm__ __volatile__(
-        /* 汇编语言 */
         ":::memory"
+       /* "cld\n\t"
+        "movl %0, %%ecx\n\t"
+        "movl %1, %%esi\n\t"
+        "repnz lodsd\n\t"
+        "movl %0, %%ecx\n\t"
+        "repnz stosd\n\t"
+        ::"=r"(size << ALIGN):memory */
    );
-   return NULL;
+
+   return dst;
+}
+/* @Note: __asm__ [__volatile__]("instruction list":Output:Input:Clobber/Modify) */
+/* @Note:  */
+
+extern inline void *_zero(void *src, size_t size)
+{
+    #ifdef _X86_
+    /* AT&T汇编语言 */
+    __asm__ __volatile(
+        "cli;"
+        "mov %0, %%ecx;"
+        "xor %%eax, %%eax;"
+        "rep stosd;"
+        ::"r"(size << ALIGN)
+    );
+    #else
+    #endif
+
+    return src;
 }
 
 /* 读socket@一直读直至内核缓冲区没数据为止 */

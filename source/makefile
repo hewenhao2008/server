@@ -8,11 +8,17 @@ PROJECT_NAME = serv
 PLATFORM = LINUX
 ARCH = _X86_
 
+# 环境初始化
+# ifeq ($(PLATFORM), LINUX)
+#    CC = gcc
+# endif
+
 # 编译工具链
 CC = gcc
+CP = g++
 LD = ld
-AR = ar
-CC_OPTION = -DDEBUG -D$(ARCH) -D$(PLATFORM) -Wall
+AR = ar -tr
+CC_OPTION = -DDEBUG -D$(ARCH) -D$(PLATFORM) -Wall # --std=c99
 LD_OPTION = -lc -pthread
 
 # SHELL命令
