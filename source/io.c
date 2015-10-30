@@ -55,7 +55,7 @@ extern inline void *_zero(void *src, size_t size)
     __asm__ __volatile(
         "cli;"
         "rep stosd;"
-        ::"s"(src), "c"(size << ALIGN)
+        ::"s"(src), "c"(size << SHIFT)
         :"%%ecx", "%%esi"
     );
 
