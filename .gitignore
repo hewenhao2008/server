@@ -1,6 +1,9 @@
 .gitignore
 bin/
 bind/
+*.s
+*.o
+*.swp
 source/*.o
 source/*.c~
 source/*.h~

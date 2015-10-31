@@ -14,8 +14,8 @@
 
 /* 结构体内存对齐大小 */
 #if defined(_X86_)
-#define ALIGN 0x08
-#define SHIFT 0x03
+#define ALIGN 0x04
+#define SHIFT 0x02
 #endif
 
 /* windows平台下报错 */

@@ -39,7 +39,7 @@ int setdef(size_t size)
 /* 高效内存拷贝函数的实现 */
 /* @Note: 频繁的数据拷贝是服务器的性能瓶颈之一，本文件提供了基于汇编的高效实现方式定义
 为内联函数减少函数调用的开销（参数、返回地址、寄存器入栈出栈，指令跳转降低CPU Cache命中率的问题）。 */
-extern inline void *_memcpy(const void *src, void *dst, size_t size)
+static inline void *_memcpy(const void *src, void *dst, size_t size)
 {
     /* AT&T汇编语言 */
    __asm__ __volatile__(
@@ -49,18 +49,19 @@ extern inline void *_memcpy(const void *src, void *dst, size_t size)
    return dst;
 }
 
-/* @Note:将指定内存块初始化为0 */
-extern inline void *_zero(void *src, size_t size)
+/* 内存块初始化为0 */
+/* @Note:将指针ptr指向内存块初始化为0 */
+static inline void *_zero(void *ptr, size_t size)
 {
     /* AT&T汇编语言 */
-    __asm__ __volatile(
-        "cli;"
-        "rep stosd;"
-        ::"s"(src), "c"(size >> SHIFT)
-        :"%%ecx", "%%esi"
+    __asm__ __volatile__(
+        "cld;"
+        "xor %%eax, %%eax;"
+        "rep stosl;"
+        ::"D"(ptr), "c"(size)
     );
 
-    return src;
+    return ptr;
 }
 
 /* 读socket@一直读直至内核缓冲区没数据为止 */
