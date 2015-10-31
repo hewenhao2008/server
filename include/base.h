@@ -12,16 +12,16 @@
 #define NDEBUG
 #endif
 
-/*
-#if defined(WIN32) || defined(_WIN32)
-#define LINUX
+/* 结构体内存对齐大小 */
+#if defined(_X86_)
+#define ALIGN 0x08
+#define SHIFT 0x03
 #endif
 
-#ifdef LINUX
-#define STDCALL
-#else
-#define STDCALL __stdcall
-#endif */
+/* windows平台下报错 */
+#if defined(WIN32) || defined(_WIN32)
+#error("released under linux/unix.")
+#endif
 
 #define STDCALL /* 标准调用约定 */
 #define CALLBACK

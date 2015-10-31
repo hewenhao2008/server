@@ -49,13 +49,14 @@ extern inline void *_memcpy(const void *src, void *dst, size_t size)
    return dst;
 }
 
+/* @Note:将指定内存块初始化为0 */
 extern inline void *_zero(void *src, size_t size)
 {
     /* AT&T汇编语言 */
     __asm__ __volatile(
         "cli;"
         "rep stosd;"
-        ::"s"(src), "c"(size << SHIFT)
+        ::"s"(src), "c"(size >> SHIFT)
         :"%%ecx", "%%esi"
     );
 
