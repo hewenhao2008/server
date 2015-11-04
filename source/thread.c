@@ -10,7 +10,11 @@
 
 /* x86架构的lock指定前缀 */
 /* @Note: 单核CPU中一条机器指令始终为原子操作，无需使用lock指定前缀，多核CPU中多核同时访问一个内存单元，可能会造成问题，所以需lock指令前缀锁定cpu地址总线(ABUS) */
+#ifndef UP
+#define LOCK_PREFIX "lock"
+#else
 #define LOCK_PREFIX
+#endif
 
 /* 原子操作值类型 */
 /* @Note: volatile关键字告诉gcc始终从内存取得counter变量的值，而非CPU寄存器或缓存 */
@@ -52,10 +56,3 @@ static inline void atomic_sub(int i, atomic_t *v)
 }
 
 /* 开启新线程 */
-HTHREAD STDCALL new_thread(void *(STDCALL *start_routine) (void *), int priority, int core, void *args)
-{
-	#ifdef LINUX
-	#endif
-	
-	return NULL;
-}
