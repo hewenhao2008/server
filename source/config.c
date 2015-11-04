@@ -13,6 +13,8 @@
 /* 映射宏＠将文本映射至c语言结构体 */
 #define END_MAP
 
+size_t def_buf_size = 32 * 1024;
+
 /* config句柄 */
 typedef struct __config
 {

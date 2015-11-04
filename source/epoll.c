@@ -11,6 +11,9 @@
 #define _SIZE 256
 #define WAIT 10
 
+/* linux内核默认tcp缓冲区大小 */
+extern size_t def_buf_size;
+
 /* 保存指向系统运行环境数据结构的指针 */
 static RTENV *rte;
 
@@ -32,6 +35,13 @@ int ready_for_loop(unsigned int ip, unsigned int port)
 			addr.sin_family 		= AF_INET;
 			addr.sin_port 			= htons(port); // 监听端口9000
 			addr.sin_addr.s_addr 	= (ip == 0) ? INADDR_ANY : ip;  // 绑定所有网卡
+			
+			/* 设置系统默认缓冲区大小 */
+			int _res;
+			_res = setsockopt(sock, SOL_SOCKET, SO_RCVBUF, (char *)&def_buf_size, sizeof(socklen_t));
+			assert(_res != -1);
+			_res = setsockopt(sock, SOL_SOCKET, SO_SNDBUF, (char *)&def_buf_size, sizeof(socklen_t));
+			assert(_res != -1);
 			
 			int _r = bind(sock, (struct sockaddr *)&addr, \
 					sizeof(struct sockaddr));
