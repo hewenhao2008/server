@@ -38,7 +38,8 @@ static inline int atomic_get(atomic_t *v)
 	return v->counter;
 }
 
-/* 原子操作 - 加法 */
+/* 加法 */
+/* @Note: 原子操作，确保值只会被一个线程所修改 */
 static inline void atomic_add(int i, atomic_t *v)
 {
 	__asm__ __volatile__(
@@ -48,7 +49,8 @@ static inline void atomic_add(int i, atomic_t *v)
 	);
 }
 
-/* 原子操作 - 减法 */
+/* 减法 */
+/* @Note: 原子操作，确保值只会被一个线程所修改 */
 static inline void atomic_sub(int i, atomic_t *v)
 {
 	__asm__ __volatile__(
@@ -58,7 +60,8 @@ static inline void atomic_sub(int i, atomic_t *v)
 	);
 }
 
-/* 原子操作 - 自增一 */
+/* 自增一 */
+/* @Note: 原子操作，确保值只会被一个线程所修改 */
 static inline void atomic_inc(atomic_t *v)
 {
 	__asm__ __volatile__(
@@ -67,7 +70,8 @@ static inline void atomic_inc(atomic_t *v)
 	);
 }
 
-/* 原子操作 - 自减一 */
+/* 自减一 */
+/* @Note: 原子操作，确保值只会被一个线程所修改 */
 static inline void atomic_dec(atomic_t *v)
 {
 	__asm__ __volatile__(
@@ -76,15 +80,17 @@ static inline void atomic_dec(atomic_t *v)
 	);
 }
 
-/* 原子操作　- 自增之后并返回值 */
+/* 自增之后并返回值 */
+/* @Note: 原子操作，确保值只会被一个线程所修改 */
 static inline int atomic_add_return(int i, atomic_t *v)
 {
 	int _i;
-	/* 386 CPU */
+	/* 386 CPU编译器报错 */
 	#ifdef _386
-	#error("too old arch.")
+	#error("too old architecture.")
 	#endif
-	/* 486之后的数据 */
+
+	/* 486之后的CPU */
 	_i = i;
 	__asm__ __volatile__(
 		LOCK_PREFIX "xaddl %0, %1"
@@ -95,4 +101,48 @@ static inline int atomic_add_return(int i, atomic_t *v)
 	return _i + i;
 }
 
-/* 开启新线程 */
+/* 自减之后并返回值 */
+/* @Note: 原子操作，确保值只会被一个线程所修改 */
+static inline int atomic_sub_return(int i, atomic_t *v)
+{
+    return atomic_add_return(-i, v);
+}
+
+/* 线程优先级 */
+/* @Note: 对OS线程调度算法做了透明处理 */
+typedef enum
+{
+    REAL = -1,  // 实时
+    URGEN,      // 紧急
+    NORMAL,     // 正常
+    IDLE        // 空闲
+}PRIORITY;
+
+/* 线程数据结构 */
+/* @Note: 类似TEB的结构体，描述线程的信息 */
+typedef struct
+{
+    pid_t __tid;    // 线程ID
+    int __core;     // 线程context所在的CPU核
+    PRIORITY __prio; // 线程优先级
+}thread;
+
+/* 创建新线程 */
+/* @Note: 创建新的线程并且可以指定线程优先级与线程运行的CPU核心 */
+HTHREAD STDCALL new_thread(void *(STDCALL *start_routine) (void *), PRIORITY priority, int core)
+{
+    thread *thr = (thread *)malloc(sizeof(thread));
+    assert(thr != NULL);
+    if(thr)
+    {
+        ENTER();
+        int _res = -1;
+        JUDGE(_res);
+        // pthread_t _thr;
+        // pthread_attr_t attr; // 线程属性
+        // _res = pthread_attr_init(&attr);
+        LEAVE();
+    }
+
+    return NULL;
+}
