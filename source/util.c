@@ -9,8 +9,9 @@
 #include <sys/sysinfo.h>
 
 static HENV _h = NULL;
-// 性能统计 - 可用于权重计算
-// 获取系统全局的RTE
+
+/* 获取系统全局rte */
+/* @Note: 运行时环境rte(runtime environment) */
 HENV get_rte(void)
 {
 	if(!_h)
@@ -20,17 +21,18 @@ HENV get_rte(void)
 	return _h;
 }
 
-//　初始化系统全局RTE
+/* 初始化全局rte */
+/* @Note: 返回rte句柄 */
 HENV init_rte(void)
 {
 	if(!_h)
 	{
 		RTENV *rte = (RTENV *)malloc(sizeof(RTENV));
-		assert(rte != NULL); // 在内存中分配数据结构 
+		assert(rte != NULL);
 		if(rte)
 		{	
 			memset((void *)rte, sizeof(RTENV), 0);
-			// 获取系统启动时间
+			/* 获取系统启动时间 */
 			struct sysinfo _info;	
 			ZEROMEMORY(_info);
 			sysinfo(&_info);
@@ -40,17 +42,25 @@ HENV init_rte(void)
 			
 			return (HENV)rte;
 		}
-		// 分配内存失败，退出
+		/* 系统分配内存失败，异常退出 */
 		abort();
 	}
 	
 	return _h;
 }
 
-// 程序要使用的环境变量: SERVADDR=127.0.0.1:8000
-void parse_env_vars()
+/* 配置选项的值 */
+typedef union
 {
-	;//getenv(_env[0]);
+    int data;
+    char *pdata;
+}value;
+
+unsigned int host, port;
+
+/* 解析环境变量 */
+/* @Note: 配置文件的优先级为，命令行参数 > 环境变量 > 配置文件 */
+int parsenv()
+{
+	return 0;
 }
-
-

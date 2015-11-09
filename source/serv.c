@@ -2,6 +2,7 @@
 #include <util.h>
 #include <link.h>
 #include <epoll.h>
+#include <config.h>
 #include <sys/stat.h>
 
 // 解析命令行参数
@@ -63,6 +64,8 @@ extern char **environ;
 
 int main(int argc, char **argv)
 {
+    // 配置文件句柄
+    HCONFIG __conf = NULL;
 	// 忽略错误参数
 	opterr = 0;
 	char c;
@@ -73,13 +76,16 @@ int main(int argc, char **argv)
 			case 'd': daemonize(); break;
 			case 'h': usage(); break;
 			case '?': usage(); break;
-			case 'c': /* loadconf(optarg); */ break;
+			case 'c': __conf = loadconf((const char *)optarg); break;
 		}
 	}
+    // 加载配置文件失败，则读取环境变量
+    if(!__conf)
+    {
+    }
 	#ifdef DEBUG
-	// 程序调试用
+    //　调试信息 
 	#endif
-	// 配置以环境变量优先，配置文件次之。
 	int fd;
 	if((fd = ready_for_loop(0, 9000)) != -1)
 	{

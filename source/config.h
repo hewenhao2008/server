@@ -13,13 +13,7 @@
 /* config句柄 */
 typedef void *HCONFIG;
 
-/* config的选项值 */
-typedef unsigned int HVALUE;
-
 /* 获取conf文件句柄 */
 HCONFIG STDCALL loadconf(const char *path);
-
-/* 获取conf文件一个选项的值 */
-HVALUE STDCALL getvalue(HCONFIG, const char *field);
 
 #endif
