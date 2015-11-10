@@ -82,7 +82,7 @@ int main(int argc, char **argv)
     // 加载配置文件失败，则读取环境变量
     if(!__conf)
     {
-		// assert(parsenv());
+		assert(parsenv());
     }
 	#ifdef DEBUG
     //　调试信息 
