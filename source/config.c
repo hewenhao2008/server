@@ -39,7 +39,22 @@ typedef struct __node
 	struct __node *rleaf;
 	color_t color; 
 	paires *map;
+	unsigned int score;
+	//int (*get_score)(paires *);
 }node;
+
+/* 计算二叉树节点权值 */
+/* @Note: 根据二叉树节点权值进行排序 */
+int get_score(paires *map)
+{
+	int score = 0;
+	char *cp = (char *)map->pkey;
+	while(cp++ != NULL)
+	{
+		score += *cp << 3;
+	}
+	return score;
+}
 
 /* 二叉树结构体 */
 /* @Note: 描述整棵二叉树属性的数据结构 */
@@ -49,13 +64,18 @@ typedef struct __tree
 	node *root;
 	/* 二叉树节点个数 */
 	size_t count;
-	/* 红色节点个数 */
-	size_t red;
-	/* 黑色节点个数 */
-	size_t black;
+	/* 树的深度 */
 	int depth;
 	/* 树的度 */
-	int degreee;
+	int degree;
+	/* 获取树的深度 */
+	//int (*get_depth)(struct __tree *);
+	/* 获取树的度 */
+	//int (*get_degree)(struct __tree *);
+	/* 红色节点个数 */
+	//size_t red;
+	/* 黑色节点个数 */
+	//size_t black;
 }tree;
 
 /* 初始化红黑二叉树 */
@@ -66,11 +86,34 @@ static inline void init_tree(tree *_tree)
 	_tree->depth = 1;
 }
 
+/* 向二叉树插入节点 */
+/* @Note: 递归实现方式 */
+int insert_recursive(node *_root, node *_node)
+{
+	return 0;
+}
+
+/* 向二叉树插入节点 */
+int insert_node(tree *_tree, node *_node)
+{
+	_node->score = get_score(_node->map);
+	_tree->count++;
+	/* 调用递归实现方式　*/
+	return insert_recursive(_tree->root, _node);
+}
+
 /* 二叉树的深度 */
 /* @Note: 默认二叉树的根节点深度depth为1 */
 int depth(tree *_tree)
 {
-	return 0;
+	return _tree->depth;
+}
+
+/* 二叉树的度 */
+/* @Note: 默认二叉树的度为0 */
+int degree(tree *_tree)
+{
+	return _tree->degree;
 }
 
 /* 配置文件结构体 */
@@ -94,5 +137,5 @@ HCONFIG STDCALL loadconf(const char *path)
         fclose(_f);
         _f = NULL;
     }
-    return 0;
+    return NULL;
 }
