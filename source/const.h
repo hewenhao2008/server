@@ -5,7 +5,7 @@
 #define VERSION "1.0.1"
 
 #define version() do{\
-	printf("%s %s\n", SERVAPP, VERSION); exit(0);\
+	fprintf(stdout, "%s %s\n", SERVAPP, VERSION); exit(0);\
 }while(0)
 
 #endif
