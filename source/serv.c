@@ -1,6 +1,7 @@
 #include <base.h>
 #include <util.h>
 #include <link.h>
+#include <const.h>
 #include <epoll.h>
 #include <config.h>
 #include <sys/stat.h>
@@ -53,6 +54,7 @@ void usage(void)
 		"  @mail: i-careforu@foxmail.com\n"
 		"**************************************\n\n"
 		"usage: serv [-d] [-c <conf>].\n"
+		"  -v version.\n"
 		"  -d daemon.\n"
 		"  -c config.\n\n"
 		);
@@ -69,11 +71,12 @@ int main(int argc, char **argv)
 	// 忽略错误参数
 	opterr = 0;
 	char c;
-	while((c = getopt(argc, argv, "dc:h")) != -1)
+	while((c = getopt(argc, argv, "dc:hv")) != -1)
 	{
 		switch(c)
 		{
 			case 'd': daemonize(); break;
+			case 'v': version(); break;
 			case 'h': usage(); break;
 			case '?': usage(); break;
 			case 'c': __conf = loadconf((const char *)optarg); break;
