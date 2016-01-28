@@ -25,8 +25,8 @@ void daemonize(void)
 		}
 		//　新会话
 		setsid();
-		int fd;
-		if((fd = open("/dev/null", O_RDWR)) != -1)
+        int fd;
+		if(!OPT_INT(getoption(NULL, NULL)) && (fd = open("/dev/null", O_RDWR)) != -1)
 		{
 			// 重定向标准句柄 stdin(0), stdout(1), stderr(2)
 			dup2(fd, 0);
@@ -45,7 +45,7 @@ void daemonize(void)
 }
 
 // 显示程序帮助信息
-void usage(void)
+NORETURN void usage(void)
 {	
 	fprintf(stdout, "\n" \
 		"***************************************\n"
@@ -59,7 +59,7 @@ void usage(void)
 		"  -c config.\n\n"
 		);
 	
-	return ;
+    exit(0);
 }
 
 extern char **environ;
@@ -82,14 +82,7 @@ int main(int argc, char **argv)
 			case 'c': __conf = loadconf((const char *)optarg); break;
 		}
 	}
-    // 加载配置文件失败，则读取环境变量
-    if(!__conf)
-    {
-		// assert(parsenv());
-    }
-	#ifdef DEBUG
-    //　调试信息 
-	#endif
+    // 加载环境变量中的配置，并且覆盖掉配置文件中相同选项
 	int fd;
 	if((fd = ready_for_loop(0, 9000)) != -1)
 	{

@@ -139,3 +139,8 @@ HCONFIG STDCALL loadconf(const char *path)
     }
     return NULL;
 }
+
+void *STDCALL getoption(void *key, void *val)
+{
+    return NULL;
+}

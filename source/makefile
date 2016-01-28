@@ -18,7 +18,7 @@ CC = gcc
 CP = g++
 LD = ld
 AR = ar -tr
-CC_OPTION = -DDEBUG -D$(ARCH) -D$(PLATFORM) -Wall # --std=c99
+CC_OPTION = -DDEBUG -D$(ARCH) -D$(PLATFORM) -Wno-pointer-to-int-cast -Wall # --std=c99
 LD_OPTION = -lc -pthread
 
 # SHELL命令

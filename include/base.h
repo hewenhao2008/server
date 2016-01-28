@@ -38,6 +38,13 @@
 #define CDEL 
 #define CALLBACK STDCALL
 
+/* GCC中修饰不返回的函数特性 */
+#if defined(__GNUC__)
+#define NORETURN __attribute__((noreturn))
+#else
+#define NORETURN
+#endif
+
 /* 功能性宏定义 */
 
 /* 进入错误处理结构 */
