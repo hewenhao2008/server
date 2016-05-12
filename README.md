@@ -1,2 +1,4 @@
-# server
- high concurrent 
+# 基于linux epoll的通用高并发框架
+
+## 项目说明
+本项目为本人自己闲暇时间写的一个试验性程序，用于原型验证，尚不可应用于生产环境。`epoll`
